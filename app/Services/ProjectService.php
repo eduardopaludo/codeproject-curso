@@ -10,14 +10,13 @@ namespace CodeProject\Services;
 
 
 use CodeProject\Repositories\ProjectRepository;
+use Illuminate\Filesystem\Filesystem;
+use Illuminate\Contracts\Filesystem\Factory as Storage;
 use CodeProject\Validators\ProjectValidator;
 use Illuminate\Contracts\Validation\ValidationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 use Prettus\Validator\Exceptions\ValidatorException;
-
-use Illuminate\Filesystem\Filesystem;
-use Illuminate\Contracts\Filesystem\Factory as Storage;
 
 class ProjectService
 {
@@ -90,7 +89,7 @@ class ProjectService
         $this->storage->put($projectFile->name.".".$data['extension'], $this->filesystem->get($data['file']));
     }
 
-    public function delete($id)
+    public function deleteFile($id)
     {
         $file = $this->repository->skipPresenter()->find($id);
         $this->storage->delete($id.'.'.$file->extension);

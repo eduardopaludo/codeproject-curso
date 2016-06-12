@@ -11,11 +11,16 @@ class ProjectFile extends Model implements Transformable
     use TransformableTrait;
 
     protected $fillable = [
+        'project_id',
         'name',
         'description',
         'extension',
     ];
 
+    /**
+     * Get project
+     * @return \CodeProject\Entities\Project
+     */
     public function project()
     {
         return $this->belongsTo(Project::class);

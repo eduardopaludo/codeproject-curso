@@ -11,6 +11,7 @@ class Project extends Model implements Transformable
     use TransformableTrait;
 
     protected $fillable = [
+        'id',
         'owner_id',
         'client_id',
         'name',
@@ -28,6 +29,10 @@ class Project extends Model implements Transformable
         return $this->hasMany(ProjectNote::class);
     }
 
+    /**
+     * Get Files
+     * @return \CodeProject\Entities\ProjectFile
+     */
     public function files()
     {
         return $this->hasMany(ProjectFile::class);
