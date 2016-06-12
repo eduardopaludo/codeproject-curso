@@ -13,7 +13,11 @@ use CodeProject\Repositories\ProjectRepository;
 use CodeProject\Validators\ProjectValidator;
 use Illuminate\Contracts\Validation\ValidationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+
 use Prettus\Validator\Exceptions\ValidatorException;
+
+use Illuminate\Filesystem\Filesystem;
+use Illuminate\Contracts\Filesystem\Factory as Storage;
 
 class ProjectService
 {
@@ -25,11 +29,21 @@ class ProjectService
      * @var ProjectValidator
      */
     private $validator;
+    /**
+     * @var Filesystem
+     */
+    private $filesystem;
+    /**
+     * @var Storage
+     */
+    private $storage;
 
-    public function __construct(ProjectRepository $repository, ProjectValidator $validator)
+    public function __construct(ProjectRepository $repository, ProjectValidator $validator, Filesystem $filesystem, Storage $storage)
     {
         $this->repository = $repository;
         $this->validator = $validator;
+        $this->filesystem = $filesystem;
+        $this->storage = $storage;
     }
 
     public function create(array $data)
@@ -66,6 +80,22 @@ class ProjectService
         {
             return ['error' => true, 'message' => $e->getMessageBag()];
         }
+    }
+
+    public function createFile(array $data)
+    {
+        $project = $this->repository->skipPresenter()->find($data['project_id']);
+        $projectFile = $project->files()->create($data);
+
+        $this->storage->put($projectFile->name.".".$data['extension'], $this->filesystem->get($data['file']));
+    }
+
+    public function delete($id)
+    {
+        $file = $this->repository->skipPresenter()->find($id);
+        $this->storage->delete($id.'.'.$file->extension);
+
+        return $this->repository->delete($id);
     }
 
     public function members($id)
