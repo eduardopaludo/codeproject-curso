@@ -7,6 +7,7 @@ use Prettus\Repository\Criteria\RequestCriteria;
 use CodeProject\Repositories\ProjectRepository;
 use CodeProject\Entities\Project;
 use CodeProject\Validators\ProjectValidator;
+use CodeProject\Presenters\ProjectPresenter;
 
 /**
  * Class ProjectRepositoryEloquent
@@ -32,5 +33,19 @@ class ProjectRepositoryEloquent extends BaseRepository implements ProjectReposit
     public function boot()
     {
         $this->pushCriteria(app(RequestCriteria::class));
+    }
+
+    public function isOwner($projectId, $userId)
+    {
+        if(count($this->findWhere(['id'=>$projectId, 'owner_id'=>$userId]))){
+            return true;
+        }
+
+        return false;
+    }
+
+    public function presenter()
+    {
+        return ProjectPresenter::class;
     }
 }

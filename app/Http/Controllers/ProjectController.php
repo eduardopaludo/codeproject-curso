@@ -6,6 +6,8 @@ use CodeProject\Validators\ProjectValidator;
 use Illuminate\Http\Request;
 use CodeProject\Http\Requests;
 use CodeProject\Http\Controllers\Controller;
+use LucaDegasperi\OAuth2Server\Facades\Authorizer;
+
 class ProjectController extends Controller
 {
     /**
@@ -32,7 +34,7 @@ class ProjectController extends Controller
      */
     public function index()
     {
-        return $this->service->all();
+        return $this->repository->findWhere(['owner_id'=> Authorizer::getResourceOwnerId()]);
     }
     /**
      * Store a newly created resource in storage.
@@ -52,7 +54,10 @@ class ProjectController extends Controller
      */
     public function show($id)
     {
-        return $this->service->find($id);
+        if($this->checkProjectOwner($id)==false){
+            return ['error' => 'Acesso negado'];
+        }
+        return $this->repository->find($id);
     }
     /**
      * Update the specified resource in storage.
@@ -63,6 +68,9 @@ class ProjectController extends Controller
      */
     public function update(Request $request, $id)
     {
+        if($this->checkProjectOwner($id)==false){
+            return ['error' => 'Acesso negado'];
+        }
         return $this->service->update($request->all(), $id);
     }
     /**
@@ -73,6 +81,9 @@ class ProjectController extends Controller
      */
     public function destroy($id)
     {
+        if($this->checkProjectOwner($id)==false){
+            return ['error' => 'Acesso negado'];
+        }
         return $this->service->destroy($id);
     }
 
@@ -114,5 +125,12 @@ class ProjectController extends Controller
     public function isMember(Request $request, $id, $userId)
     {
         return $this->service->isMember($id, $userId);
+    }
+
+    private function checkProjectOwner($projectId)
+    {
+        $userId = Authorizer::getResourceOwnerId();
+
+        return $this->repository->isOwner($projectId, $userId);
     }
 }
